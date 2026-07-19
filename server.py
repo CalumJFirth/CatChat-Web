@@ -1,4 +1,4 @@
-import socket
+import socket, time, json
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -8,6 +8,17 @@ server.bind(("127.0.0.1", 5000))
 server.listen()
 
 print("Server started...")
+
+messages = [
+    {
+        "username": "Calum",
+        "text": "Hello!"
+    },
+    {
+        "username": "Bob",
+        "text": "Hi there!"
+    }
+]
 
 #Continuely accept new clients
 while True:
@@ -25,25 +36,38 @@ while True:
     method, path, version = lines[0].split(" ")
     print("Method:", method)
     print("Path:", path)
-    print("Version:", version)
 
 
     #Routing
     if path == "/":
         filename = "static/index.html"
         content_type = "text/html"
-    elif path =="/style.css":
+
+        with open(filename) as file:
+            contents = file.read()
+
+    elif path == "/style.css":
         filename = "static/style.css"
         content_type = "text/css"
-    else:
-        print("Wrong Path")
+
+        with open(filename) as file:
+            contents = file.read()
+
+    elif path == "/script.js":
+        filename = "static/script.js"
+        content_type = "text/javascript"
+
+        with open(filename) as file:
+            contents = file.read()
+
+    elif path == "/messages":
+        contents = json.dumps(messages)
+        content_type = "application/json"
 
 
 
 
-    #Open File
-    with open(filename, "r") as file:
-        contents = file.read()
+    
 
     #Create Response
     response = (
