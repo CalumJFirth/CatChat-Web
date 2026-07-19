@@ -1,5 +1,17 @@
 import socket, time, json
 
+def parse_request(request):
+    lines = request.split("\r\n")
+    method, path, version = lines[0].split(" ")
+    blank_line = lines.index("")
+    headers = lines[1:blank_line]
+    body = lines[blank_line + 1]
+    print("Method:", method)
+    print("Path:", path)
+    print("Body:", body)
+    return method, path, version, headers, body
+
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -32,42 +44,44 @@ while True:
     request = request.decode()
 
     #Parse Http Request
-    lines = request.split("\r\n")
-    method, path, version = lines[0].split(" ")
-    print("Method:", method)
-    print("Path:", path)
+    method, path, version, headers, body = parse_request(request)
 
+    
 
     #Routing
-    if path == "/":
+    if method == "GET" and path == "/" :
         filename = "static/index.html"
         content_type = "text/html"
 
         with open(filename) as file:
             contents = file.read()
 
-    elif path == "/style.css":
+    elif method == "GET" and path == "/style.css":
         filename = "static/style.css"
         content_type = "text/css"
 
         with open(filename) as file:
             contents = file.read()
 
-    elif path == "/script.js":
+    elif method == "GET" and path == "/script.js":
         filename = "static/script.js"
         content_type = "text/javascript"
 
         with open(filename) as file:
             contents = file.read()
 
-    elif path == "/messages":
+    elif method == "GET" and path == "/messages":
         contents = json.dumps(messages)
+        content_type = "application/json"
+    
+    elif method == "POST" and path == "/messages":
+
+        message = json.loads(body)
+        messages.append(message)
+        contents = json.dumps({"status":"ok"})
         content_type = "application/json"
 
 
-
-
-    
 
     #Create Response
     response = (
