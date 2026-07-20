@@ -54,6 +54,24 @@ input.onkeydown = function(event) {
 
 
 
+// WebSockets
+const socket = new WebSocket("ws://127.0.0.1:8765");
+
+socket.onopen = () => {
+    console.log("Connected");
+
+    socket.send("Hello from the browser!");
+};
+
+socket.onmessage = (event) => {
+    console.log(event.data);
+}
+
+socket.onclose = () => {
+    console.log("Disconnected");
+};
+
+
 
 const button = document.getElementById("sendButton");
 button.onclick = sendMessage
